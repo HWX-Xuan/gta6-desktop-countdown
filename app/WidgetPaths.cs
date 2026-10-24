@@ -13,6 +13,10 @@ internal static class WidgetPaths
 
     public static string WallpaperJpg => Path.Combine(DataDirectory, "wallpaper.jpg");
 
+    public static string BackgroundJpg => Path.Combine(DataDirectory, "background.jpg");
+
+    public static string BackgroundHudJpg => Path.Combine(DataDirectory, "background-hud.jpg");
+
     public static string LogFile => Path.Combine(DataDirectory, "widget.log");
 
     public static string CurrentWallpaperPath { get; set; } = string.Empty;

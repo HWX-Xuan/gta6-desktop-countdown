@@ -31,7 +31,7 @@
       accent: "主题色",
       accentHint: "霓虹光晕的颜色",
       motion: "动态效果",
-      motionHint: "壁纸缓慢漂移、光晕呼吸和扫描线",
+      motionHint: "开场动画与每分钟进度高光（关闭可进一步省电）",
       background: "背景效果",
       backgroundHint: "全部实时作用于桌面层",
       blur: "背景模糊",
@@ -74,7 +74,21 @@
       progress: "等待进度",
       previewNote: "预览会跟随滑杆实时变化，并同步到桌面。",
       shortcutHint: "随时打开设置",
-      asideNote: "壁纸始终来自你当前的 Windows 桌面。修改壁纸后，倒计时会自动同步新的背景。"
+      asideNote: "壁纸始终来自你当前的 Windows 桌面。修改壁纸后，倒计时会自动同步新的背景。",
+      about: "版本与更新",
+      updateChecking: "正在检查更新…",
+      updateCheckingHint: "连接 GitHub 发布页面",
+      checkNow: "检查更新",
+      openRelease: "打开发布页面",
+      updateAvailable: "发现新版本",
+      updateUpToDate: "已是最新版本",
+      updateUnknown: "暂时无法检查更新",
+      updateUnconfigured: "开发版本未配置发布源",
+      updateAvailableHint: "最新版本为 v{version}，可前往发布页面下载",
+      updateUpToDateHint: "当前版本 v{version} 已是最新",
+      updateUnknownHint: "网络不可用或仓库暂无可用的 Release",
+      updateUnconfiguredHint: "发布前请在 UpdateService.cs 中填写 GitHub 仓库地址",
+      updateCheckingAgain: "检查中…"
     },
     en: {
       kicker: "GTA VI · DESKTOP WIDGET",
@@ -88,7 +102,7 @@
       accent: "Accent color",
       accentHint: "Colour of the neon glow",
       motion: "Motion",
-      motionHint: "Slow wallpaper drift, breathing glow and scanlines",
+      motionHint: "Intro animation and a minute-change highlight (turn off to save power)",
       background: "Background effects",
       backgroundHint: "Applied live to the desktop layer",
       blur: "Wallpaper blur",
@@ -131,7 +145,21 @@
       progress: "WAIT PROGRESS",
       previewNote: "The preview follows the sliders and updates the desktop at the same time.",
       shortcutHint: "Open settings anytime",
-      asideNote: "The background is always your current Windows wallpaper. It is refreshed automatically when you change it."
+      asideNote: "The background is always your current Windows wallpaper. It is refreshed automatically when you change it.",
+      about: "Version & updates",
+      updateChecking: "Checking for updates…",
+      updateCheckingHint: "Contacting the GitHub release page",
+      checkNow: "Check now",
+      openRelease: "Open releases",
+      updateAvailable: "Update available",
+      updateUpToDate: "You are up to date",
+      updateUnknown: "Update check unavailable",
+      updateUnconfigured: "Release source not configured",
+      updateAvailableHint: "Latest version is v{version}. Open the release page to download.",
+      updateUpToDateHint: "Version v{version} is the latest",
+      updateUnknownHint: "No network access or no release published yet",
+      updateUnconfiguredHint: "Set the GitHub repository in UpdateService.cs before publishing",
+      updateCheckingAgain: "Checking…"
     }
   };
 
@@ -159,7 +187,13 @@
     swatches: Array.from(document.querySelectorAll(".swatch")),
     resetButton: document.getElementById("resetButton"),
     closeButton: document.getElementById("closeButton"),
-    openDataButton: document.getElementById("openDataButton")
+    openDataButton: document.getElementById("openDataButton"),
+    versionValue: document.getElementById("versionValue"),
+    updateIcon: document.getElementById("updateIcon"),
+    updateTitle: document.getElementById("updateTitle"),
+    updateDesc: document.getElementById("updateDesc"),
+    checkUpdateButton: document.getElementById("checkUpdateButton"),
+    releaseButton: document.getElementById("releaseButton")
   };
 
   const controls = [
@@ -178,6 +212,10 @@
 
   let settings = { ...DEFAULTS };
   let autoStart = false;
+  const state = {
+    version: params.get("version") || "",
+    update: null
+  };
   let statusMode = "saved";
   let saveTimer = 0;
   let saveError = "";
@@ -283,7 +321,69 @@
 
     els.previewHeadline.textContent = copy("previewHeadline");
     els.autoStartStatus.textContent = autoStart ? copy("autoStartOn") : copy("autoStartOff");
+    renderUpdate();
     updateStatusText();
+  }
+
+  // ---------------------------------------------------------------
+  // Version and update state
+  // ---------------------------------------------------------------
+  function formatCheckedAt(value) {
+    if (!value) return "";
+    const stamp = new Date(value);
+    if (Number.isNaN(stamp.getTime())) return "";
+    return stamp.toLocaleString(settings.language === "en" ? "en-US" : "zh-CN", {
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  function renderUpdate() {
+    const version = state.version || "1.2.0";
+    const update = state.update || { state: "unknown" };
+    const latest = update.latestVersion || "";
+
+    els.versionValue.textContent = version;
+    els.updateIcon.classList.remove("is-available", "is-ok", "is-unknown");
+
+    const titleMap = {
+      available: "updateAvailable",
+      "up-to-date": "updateUpToDate",
+      unknown: "updateUnknown",
+      unconfigured: "updateUnconfigured"
+    };
+
+    let descKey;
+    if (update.state === "available") {
+      els.updateIcon.textContent = "↑";
+      els.updateIcon.classList.add("is-available");
+      descKey = "updateAvailableHint";
+    } else if (update.state === "up-to-date") {
+      els.updateIcon.textContent = "✓";
+      els.updateIcon.classList.add("is-ok");
+      descKey = "updateUpToDateHint";
+    } else if (update.state === "unconfigured") {
+      els.updateIcon.textContent = "!";
+      els.updateIcon.classList.add("is-unknown");
+      descKey = "updateUnconfiguredHint";
+    } else {
+      els.updateIcon.textContent = "?";
+      els.updateIcon.classList.add("is-unknown");
+      descKey = "updateUnknownHint";
+    }
+
+    els.updateTitle.textContent = copy(titleMap[update.state] || "updateUnknown");
+
+    let description = copy(descKey).replace("{version}", update.state === "available" ? latest || version : version);
+    const checkedAt = formatCheckedAt(update.checkedAt);
+    if (checkedAt && update.state !== "unconfigured") {
+      description += `  ·  ${checkedAt}`;
+    }
+    els.updateDesc.textContent = description;
+
+    els.releaseButton.disabled = update.state === "unconfigured";
   }
 
   function updateStatusText() {
@@ -431,6 +531,19 @@
     send({ type: "openDataFolder" });
   });
 
+  els.checkUpdateButton.addEventListener("click", () => {
+    els.checkUpdateButton.disabled = true;
+    els.updateTitle.textContent = copy("updateCheckingAgain");
+    send({ type: "checkUpdate" });
+    window.setTimeout(() => {
+      els.checkUpdateButton.disabled = false;
+    }, 1200);
+  });
+
+  els.releaseButton.addEventListener("click", () => {
+    send({ type: "openRelease" });
+  });
+
   els.closeButton.addEventListener("click", () => {
     send({ type: "close" });
   });
@@ -450,8 +563,16 @@
       if (message.type === "init") {
         settings = { ...DEFAULTS, ...(message.settings || {}) };
         autoStart = Boolean(message.autoStart);
+        state.version = message.version || state.version;
+        if (message.update) state.update = message.update;
         applyAll();
+        renderUpdate();
         setStatus("saved");
+      } else if (message.type === "updateState") {
+        state.version = message.version || state.version;
+        state.update = message.update || { state: "unknown" };
+        els.checkUpdateButton.disabled = false;
+        renderUpdate();
       } else if (message.type === "saved") {
         if (message.settings) {
           settings = { ...DEFAULTS, ...message.settings };
@@ -470,7 +591,16 @@
 
     webview.postMessage({ type: "ready" });
   } else {
+    // Standalone browser preview, used for screenshots and design checks.
+    const previewStates = {
+      available: { state: "available", latestVersion: "1.3.0", checkedAt: new Date().toISOString() },
+      uptodate: { state: "up-to-date", checkedAt: new Date().toISOString() },
+      unknown: { state: "unknown", checkedAt: new Date().toISOString() }
+    };
+    state.version = params.get("version") || "1.2.0";
+    state.update = previewStates[params.get("update")] || previewStates.available;
     applyAll();
+    renderUpdate();
     setStatus("saved");
   }
 

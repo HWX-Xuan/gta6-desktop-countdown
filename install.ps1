@@ -39,7 +39,11 @@ foreach ($target in @($desktopShortcutPath, $startMenuShortcutPath)) {
     $shortcut.IconLocation = "$icon,0"
     $shortcut.Description = "GTA VI countdown to 2026.11.18 19:00"
     $shortcut.Save()
+    $shortcut = $null
 }
+
+# Let Explorer release the shortcut files before we rewrite their properties.
+Start-Sleep -Milliseconds 350
 
 # Give the taskbar a custom identity instead of ".NET Host". The shortcut is
 # edited in a temporary copy because some sandboxed environments block direct
@@ -151,7 +155,19 @@ foreach ($shortcutPath in @($desktopShortcutPath, $startMenuShortcutPath)) {
     $temp = Join-Path $env:TEMP ("gta6-shortcut-" + [Guid]::NewGuid().ToString("N") + ".lnk")
     Copy-Item -LiteralPath $shortcutPath -Destination $temp -Force
     [Gta6ShortcutIdentity]::SetAumid($temp, "GTA6.Countdown.Desktop.v1")
-    Copy-Item -LiteralPath $temp -Destination $shortcutPath -Force
+
+    $replaced = $false
+    for ($attempt = 0; $attempt -lt 6 -and -not $replaced; $attempt++) {
+        try {
+            Copy-Item -LiteralPath $temp -Destination $shortcutPath -Force -ErrorAction Stop
+            $replaced = $true
+        }
+        catch {
+            if ($attempt -eq 5) { throw }
+            Start-Sleep -Milliseconds 250
+        }
+    }
+
     Remove-Item -LiteralPath $temp -Force
 }
 

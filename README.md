@@ -11,7 +11,7 @@ A cinematic, wallpaper-reactive GTA VI countdown for Windows.
 ![WebView2](https://img.shields.io/badge/WebView2-Evergreen-2F6FED?style=flat-square)
 ![License](https://img.shields.io/badge/license-MIT-3DA639?style=flat-square)
 
-[效果预览](#效果预览) · [功能](#功能) · [快速开始](#快速开始) · [效果设置](#效果设置) · [从源码构建](#从源码构建) · [FAQ](#faq)
+[效果预览](#效果预览) · [功能](#功能) · [快速开始](#快速开始) · [效果设置](#效果设置) · [性能](#性能) · [从源码构建](#从源码构建) · [FAQ](#faq)
 
 </div>
 
@@ -28,8 +28,7 @@ A cinematic, wallpaper-reactive GTA VI countdown for Windows.
 
 截止时间：**2026-11-18 19:00（Asia/Shanghai，UTC+8）**。到点后自动切换为「GTA VI 现已发售」。
 
-> 粉丝自制项目，与 Rockstar Games / Take-Two Interactive 无关联，GTA VI 及相关商标归其权利人所有。
-> 花费3.28 RMB，0.76亿token，除了这句话之外完全由Deepseek v4.1 flash开发。
+> 粉丝自制项目，与 Rockstar Games / Take-Two Interactive 无关联，不包含任何官方游戏素材。GTA VI 及相关商标归其权利人所有。
 
 ## 效果预览
 
@@ -61,7 +60,9 @@ A cinematic, wallpaper-reactive GTA VI countdown for Windows.
 - **中英双语**：设置界面、托盘菜单、桌面倒计时文字同步切换。
 - **开机自启**：通过带 AUMID 的开始菜单快捷方式静默启动，不弹控制台；不需要管理员权限。
 - **单实例**：程序已在运行时再次双击快捷方式，会直接打开设置，不会出现第二层倒计时。
-- **零联网**：运行时不请求网络，所有效果和壁纸都在本地处理。
+- **版本与更新**：设置里有版本卡片，可手动检查更新；发现新版本时桌面上会短暂浮现提示卡。完整记录见 [CHANGELOG.md](CHANGELOG.md)。
+- **隐私优先**：除可选的版本检查外不联网；版本检查只读取 GitHub Releases 的最新版本号，最多每 12 小时一次，失败时静默跳过。
+- **低占用**：背景只烘焙一次为静态图片，没有全屏循环动画；空闲 GPU 接近 0。
 
 ## 快速开始
 
@@ -97,7 +98,7 @@ A cinematic, wallpaper-reactive GTA VI countdown for Windows.
 | --- | --- |
 | 数字大小 | 75%–125% |
 | 主题色 | 粉 / 紫 / 青 / 橙 + 自定义取色 |
-| 动态效果 | 壁纸漂移、光晕呼吸、颗粒抖动 |
+| 动态效果 | 开场动画与每分钟一次进度高光 |
 | 背景模糊 | 0–60 px |
 | 背景亮度 | 控制壁纸明暗，保证数字可读 |
 | 色彩饱和度 | 调整壁纸整体色彩浓度 |
@@ -112,6 +113,18 @@ A cinematic, wallpaper-reactive GTA VI countdown for Windows.
 ```text
 %LOCALAPPDATA%\GTA6Countdown\settings.json
 ```
+
+### 版本与更新
+
+设置窗口右侧的「版本与更新」卡片：
+
+- 显示当前版本（本版为 `v1.2.0`）与最近一次检查时间
+- **检查更新**：立即查询 GitHub 最新 Release
+- **打开发布页面**：跳到最新版本下载
+
+程序启动后会自动检查（间隔 12 小时），发现新版本时桌面上会淡入一张提示卡，约 8 秒后自动淡出。
+
+> 仓库发布前，请把 `app/UpdateService.cs` 顶部的 `GitHubOwner` / `GitHubRepository` 改成你自己的仓库地址；未配置时卡片会显示「开发版本未配置发布源」。
 
 ## 开机自启：开启 / 取消
 
@@ -195,7 +208,10 @@ gta6-widget/
 │  ├─ SettingsWindow.xaml(.cs)  效果设置窗口
 │  ├─ DesktopHost.cs            Progman / WorkerW 挂载与回退
 │  ├─ WallpaperService.cs       壁纸读取、缩放、JPEG 缓存
+│  ├─ BackgroundRenderer.cs     模糊/调色/颗粒烘焙为静态背景
 │  ├─ SettingsService.cs        设置持久化
+│  ├─ UpdateService.cs          GitHub Release 版本检查
+│  ├─ UpdateHud.cs              桌面「发现新版本」提示
 │  ├─ AppIdentity.cs            AppUserModelID / 任务栏身份
 │  └─ assets/                   HTML/CSS/JS 界面、字体、图标
 ├─ tools/launch.vbs             静默启动器
@@ -203,6 +219,7 @@ gta6-widget/
 ├─ uninstall.ps1                卸载
 ├─ preview.png                  桌面效果截图
 ├─ settings-preview.png         设置界面截图
+├─ CHANGELOG.md                 更新日志
 ├─ LICENSE                      MIT
 └─ README.md
 ```
@@ -210,12 +227,23 @@ gta6-widget/
 ## 工作方式
 
 1. WPF 创建一个无边框、无任务栏按钮的全屏窗口。
-2. 启动时读取当前 Windows 壁纸，用 WPF 解码并缩放缓存，再交给 WebView2 做 CSS 滤镜与排版。
-3. 通过 Win32 检测桌面拓扑，把窗口挂到桌面图标之下：
+2. 启动时读取当前 Windows 壁纸，由 `BackgroundRenderer` 在 CPU 上一次性完成高斯模糊、调色、光晕、暗角和颗粒。输出尺寸等于当前显示器的物理分辨率，JPEG 质量 96。
+3. WebView2 页面只显示这张静态背景和文字，不再在每一帧重新计算全屏 CSS 滤镜。
+4. 通过 Win32 检测桌面拓扑，把窗口挂到桌面图标之下：
    - Windows 11 24H2+：`Progman` 的 raised desktop，窗口置于图标视图与壁纸 WorkerW 之间；
    - 经典拓扑：`WorkerW`。
-4. 设置窗口通过 WebView2 `postMessage` 把变更回传给 WPF，写入 JSON，并实时推回主界面。
-5. 通过 AppUserModelID + 带 AUMID 的快捷方式把任务栏图标/名称改成项目自己的身份。
+5. 设置窗口通过 WebView2 `postMessage` 把变更回传给 WPF，写入 JSON，需要时重新烘焙背景并实时推回主界面。
+6. 通过 AppUserModelID + 带 AUMID 的快捷方式把任务栏图标/名称改成项目自己的身份。
+
+## 性能
+
+这一版专门针对 GPU 占用做了低功耗优化：
+
+- **静态背景**：壁纸模糊、调色、光晕、暗角和颗粒在启动或设置改变时只计算一次，保存为一张与显示器物理分辨率等大、质量为 96 的 JPEG。
+- **无全屏循环动画**：移除了壁纸漂移、光晕呼吸、bokeh 浮动和颗粒抖动。动态效果只保留一次性开场动画与每分钟一次的进度高光。
+- **按需重绘**：秒数每秒更新一次；天、小时、分钟只在数值变化时更新。
+- **本机测试**：优化后主界面 WebView2 的空闲 GPU 平均 **低于 0.1%**（实测约 0.003%–0.03%），CPU 约 **1%–2%**（单核占比）；具体数值会随硬件和 Windows 版本浮动。
+- 设置窗口中的实时预览是临时界面，关闭后即释放。
 
 ## FAQ
 

@@ -24,10 +24,15 @@ public partial class MainWindow : Window
     private Forms.ContextMenuStrip? _trayMenu;
     private Drawing.Icon? _trayIcon;
     private DispatcherTimer? _wallpaperTimer;
+    private DispatcherTimer? _backgroundTimer;
     private HwndSource? _hwndSource;
     private IntPtr _hwnd;
     private SettingsWindow? _settingsWindow;
     private WidgetSettings _settings = WidgetSettings.Defaults();
+    private bool _renderingBackground;
+    private bool _backgroundRefreshPending;
+    private string? _updateHudPending;
+    private bool _updateHudShown;
     private bool _browserReady;
     private bool _started;
     private bool _refreshing;
@@ -88,6 +93,15 @@ public partial class MainWindow : Window
             if (_settings.ShowTrayIcon) SetupTray(showBalloon: true);
             WallpaperService.RefreshIfChanged(force: true);
 
+            if (UpdateService.TryTakePendingVersion(out var pendingVersion))
+            {
+                _updateHudPending = pendingVersion;
+                WidgetLog.Write($"Update notice queued for v{pendingVersion}.");
+            }
+
+            StartBackgroundTimer();
+            await RenderBackgroundAsync();
+
             await InitializeBrowserAsync();
 
             // WPF's layered-window implementation (Opacity < 1) can make cross-process
@@ -99,6 +113,8 @@ public partial class MainWindow : Window
             StartWallpaperWatcher();
 
             WidgetLog.Write("Widget startup sequence complete.");
+
+            _ = CheckForUpdatesAsync();
 
             if (System.Windows.Application.Current is App app && app.ConsumePendingShowSettings())
             {
@@ -140,6 +156,7 @@ public partial class MainWindow : Window
         {
             Opacity = 1;
             _ = PushSettingsAsync();
+            _ = PushBackgroundAsync();
         }
         else
         {
@@ -215,6 +232,7 @@ public partial class MainWindow : Window
         }
 
         _ = PushSettingsAsync();
+        ScheduleBackgroundRender();
     }
 
     private async Task PushSettingsAsync()
@@ -230,6 +248,98 @@ public partial class MainWindow : Window
         catch (Exception ex)
         {
             WidgetLog.Write($"Settings push failed: {ex.Message}");
+        }
+    }
+
+    private void StartBackgroundTimer()
+    {
+        _backgroundTimer = new DispatcherTimer(DispatcherPriority.Background)
+        {
+            Interval = TimeSpan.FromMilliseconds(260)
+        };
+        _backgroundTimer.Tick += async (_, _) =>
+        {
+            _backgroundTimer?.Stop();
+            await RenderBackgroundAsync();
+        };
+    }
+
+    private void ScheduleBackgroundRender(bool immediate = false)
+    {
+        if (_backgroundTimer is null) return;
+
+        _backgroundTimer.Stop();
+        _backgroundTimer.Interval = TimeSpan.FromMilliseconds(immediate ? 30 : 260);
+        _backgroundTimer.Start();
+    }
+
+    private async Task RenderBackgroundAsync()
+    {
+        if (_closing) return;
+
+        if (_renderingBackground)
+        {
+            _backgroundRefreshPending = true;
+            return;
+        }
+
+        _renderingBackground = true;
+        try
+        {
+            do
+            {
+                _backgroundRefreshPending = false;
+                var (width, height) = BackgroundRenderer.GetRenderSize(1, 1);
+                var changed = await BackgroundRenderer.RenderAsync(
+                    _settings.Clone(),
+                    WidgetPaths.WallpaperJpg,
+                    width,
+                    height);
+                if (changed)
+                {
+                    await PushBackgroundAsync();
+                }
+
+                if (changed && !_updateHudShown && _updateHudPending is { Length: > 0 } pending)
+                {
+                    _updateHudShown = true;
+                    _updateHudPending = null;
+                    UpdateHud.Begin(pending, width, height);
+                    WidgetLog.Write($"Update notice shown for v{pending}.");
+                }
+            }
+            while (_backgroundRefreshPending && !_closing);
+        }
+        catch (Exception ex)
+        {
+            WidgetLog.Write($"Background update failed: {ex}");
+        }
+        finally
+        {
+            _renderingBackground = false;
+        }
+    }
+
+    private async Task PushBackgroundAsync()
+    {
+        if (!_browserReady || Browser.CoreWebView2 is null) return;
+
+        var url = "https://gta6.data/background.jpg?v=" + DateTimeOffset.Now.ToUnixTimeMilliseconds();
+        await PushBackgroundUrl($"window.reloadBackground && window.reloadBackground({JsonSerializer.Serialize(url)});");
+    }
+
+    /// <summary>Used by <see cref="UpdateHud"/> to swap the notice frames.</summary>
+    public async Task PushBackgroundUrl(string script)
+    {
+        if (!_browserReady || Browser.CoreWebView2 is null) return;
+
+        try
+        {
+            await Browser.CoreWebView2.ExecuteScriptAsync(script);
+        }
+        catch (Exception ex)
+        {
+            WidgetLog.Write($"Background push failed: {ex.Message}");
         }
     }
 
@@ -258,7 +368,7 @@ public partial class MainWindow : Window
 
             if (WallpaperService.RefreshIfChanged())
             {
-                await PushWallpaperAsync();
+                await RenderBackgroundAsync();
             }
         }
         catch (Exception ex)
@@ -271,19 +381,19 @@ public partial class MainWindow : Window
         }
     }
 
-    private async Task PushWallpaperAsync()
+    private async Task CheckForUpdatesAsync()
     {
-        if (!_browserReady || Browser.CoreWebView2 is null) return;
-
-        var url = "https://gta6.data/wallpaper.jpg?v=" + DateTimeOffset.Now.ToUnixTimeMilliseconds();
-        var script = $"window.reloadWallpaper && window.reloadWallpaper({JsonSerializer.Serialize(url)});";
         try
         {
-            await Browser.CoreWebView2.ExecuteScriptAsync(script);
+            var result = await UpdateService.CheckAsync();
+            if (result.State == "available" && !_updateHudShown && _updateHudPending is null)
+            {
+                _updateHudPending = result.LatestVersion;
+            }
         }
         catch (Exception ex)
         {
-            WidgetLog.Write($"Wallpaper push failed: {ex.Message}");
+            WidgetLog.Write($"Startup update check failed: {ex.Message}");
         }
     }
 
@@ -442,11 +552,12 @@ public partial class MainWindow : Window
         {
             WallpaperService.RefreshIfChanged(force: true);
             _desktopHost.Attach(this);
+            await RenderBackgroundAsync();
 
             if (_browserReady)
             {
-                await PushWallpaperAsync();
                 await PushSettingsAsync();
+                await PushBackgroundAsync();
             }
         }
         catch (Exception ex)
@@ -530,6 +641,8 @@ public partial class MainWindow : Window
         }
 
         _wallpaperTimer?.Stop();
+        _backgroundTimer?.Stop();
+        _backgroundTimer = null;
         DisposeTray();
 
         try

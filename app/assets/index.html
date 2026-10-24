@@ -10,21 +10,9 @@
 <body>
   <div id="stage" class="stage">
 
-    <!-- Wallpaper plate -->
+    <!-- Pre-rendered by BackgroundRenderer: wallpaper + blur + grade + grain -->
     <div class="backdrop" aria-hidden="true">
-      <img id="wallpaper" class="wallpaper" alt="" draggable="false">
-      <div class="grade"></div>
-      <div class="wash wash-top"></div>
-      <div class="wash wash-bottom"></div>
-      <div class="glow glow-pink"></div>
-      <div class="glow glow-blue"></div>
-      <div class="glow glow-amber"></div>
-      <div class="beam"></div>
-      <div class="bokeh bokeh-a"></div>
-      <div class="bokeh bokeh-b"></div>
-      <div class="bokeh bokeh-c"></div>
-      <div class="vignette"></div>
-      <div class="grain"></div>
+      <img id="background" class="background" alt="" draggable="false">
     </div>
 
     <!-- Top chrome -->
@@ -102,8 +90,6 @@
         <span class="foot-right" id="footRight">RELEASE&nbsp;&nbsp;/&nbsp;&nbsp;2026.11.18</span>
       </div>
     </footer>
-
-    <div class="noise-line" aria-hidden="true"></div>
   </div>
 
   <script src="app.js"></script>

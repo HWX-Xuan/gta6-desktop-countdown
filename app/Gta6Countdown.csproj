@@ -12,7 +12,10 @@
     <RootNamespace>Gta6Countdown</RootNamespace>
     <ApplicationIcon>assets\app.ico</ApplicationIcon>
     <ApplicationManifest>app.manifest</ApplicationManifest>
-    <Version>1.0.0</Version>
+    <Version>1.2.0</Version>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
+    <FileVersion>1.2.0.0</FileVersion>
+    <InformationalVersion>1.2.0</InformationalVersion>
     <AssemblyTitle>GTA VI 发售倒计时</AssemblyTitle>
     <Product>GTA VI Desktop Countdown</Product>
     <Copyright>Fan-made desktop widget</Copyright>

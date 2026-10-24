@@ -583,6 +583,99 @@ button { color: inherit; }
   color: #fff;
 }
 
+.quiet-button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.quiet-button:disabled:hover {
+  border-color: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--muted);
+}
+
+/* ---------------------------------------------------------------
+   Version and update card
+   --------------------------------------------------------------- */
+.update-card {
+  margin-top: 14px;
+  padding: 15px;
+}
+
+.update-card .card-heading {
+  margin-bottom: 12px;
+}
+
+.version-chip {
+  padding: 2px 8px;
+  border: 1px solid rgba(var(--accent-rgb), 0.28);
+  border-radius: 99px;
+  background: rgba(var(--accent-rgb), 0.1);
+  color: var(--accent-soft);
+  font-family: "Cascadia Mono", "Consolas", monospace;
+  font-size: 9px;
+  letter-spacing: 0.04em;
+}
+
+.update-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.update-row .toggle-copy {
+  flex: 1;
+}
+
+.update-icon {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #b8a7bd;
+  font-family: "Cascadia Mono", "Consolas", monospace;
+  font-size: 13px;
+}
+
+.update-icon.is-available {
+  border-color: rgba(var(--accent-rgb), 0.45);
+  background: rgba(var(--accent-rgb), 0.16);
+  color: #fff;
+  box-shadow: 0 0 16px rgba(var(--accent-rgb), 0.22);
+}
+
+.update-icon.is-ok {
+  border-color: rgba(126, 226, 181, 0.35);
+  background: rgba(126, 226, 181, 0.1);
+  color: #7ee2b5;
+}
+
+.update-icon.is-unknown {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--muted-2);
+}
+
+.update-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.update-actions .quiet-button {
+  flex: 1;
+  height: 30px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
 .primary-button {
   border: 1px solid rgba(var(--accent-rgb), 0.55);
   background: linear-gradient(135deg, rgba(var(--accent-rgb), 0.85), rgba(var(--accent-rgb), 0.55));
@@ -977,9 +1070,80 @@ button { color: inherit; }
   }
 }
 
+/* Short or narrow windows (e.g. a 2K laptop at 150% scaling): keep the panels
+   side by side but compact, and show the newest card first in the aside. */
+@media (max-width: 940px) or (max-height: 620px) {
+  .page {
+    max-width: 100%;
+    padding: 18px 20px 26px;
+  }
+
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 286px;
+    gap: 16px;
+  }
+
+  .masthead h1 {
+    font-size: 26px;
+  }
+
+  .masthead {
+    margin-bottom: 14px;
+  }
+
+  .card {
+    padding: 14px 15px 13px;
+    margin-bottom: 10px;
+  }
+
+  .preview-card {
+    padding: 12px;
+  }
+
+  .preview-note,
+  .shortcut-tip {
+    display: none;
+  }
+
+  .preview-column {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Version first: it is the card most likely to be scrolled out of view. */
+  .update-card {
+    order: -3;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+
+  .preview-card {
+    order: -2;
+    margin-bottom: 10px;
+  }
+
+  .system-card {
+    order: -1;
+  }
+
+  .system-card {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  .system-card .toggle-desc {
+    display: none;
+  }
+
+  .update-actions .quiet-button {
+    height: 28px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.001ms !important;
     transition-duration: 0.001ms !important;
   }
 }
+

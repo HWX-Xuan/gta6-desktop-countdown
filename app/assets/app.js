@@ -59,7 +59,7 @@
   const isStatic = params.get("static") === "1";
 
   const stage = document.getElementById("stage");
-  const wallpaper = document.getElementById("wallpaper");
+  const background = document.getElementById("background");
   const headline = document.getElementById("headline");
   const daysEl = document.getElementById("days");
   const hoursEl = document.getElementById("hours");
@@ -103,7 +103,7 @@
     const overrides = {};
     if (params.has("lang")) overrides.language = params.get("lang");
     if (params.has("accent")) overrides.accent = `#${params.get("accent").replace(/^#/, "")}`;
-    for (const key of ["blur", "brightness", "saturation", "glow", "grain", "vignette", "numberScale"]) {
+    for (const key of ["glow", "numberScale"]) {
       if (params.has(key)) overrides[key] = Number(params.get(key));
     }
     if (params.has("motion")) overrides.motion = params.get("motion") !== "0";
@@ -142,11 +142,6 @@
 
   function applyVisualSettings() {
     const root = document.documentElement.style;
-    root.setProperty("--bg-blur", `${settings.blur}px`);
-    root.setProperty("--bg-brightness", settings.brightness.toFixed(3));
-    root.setProperty("--bg-saturation", settings.saturation.toFixed(3));
-    root.setProperty("--vignette-opacity", settings.vignette.toFixed(3));
-    root.setProperty("--grain-opacity", settings.grain.toFixed(3));
     root.setProperty("--number-scale", settings.numberScale.toFixed(3));
 
     const accent = settings.accent;
@@ -155,8 +150,8 @@
     root.setProperty("--accent-rgb", hexToRgb(accent).join(", "));
 
     const glow = settings.glow;
-    const alphas = [0.26, 0.7, 0.5, 0.3, 0.16];
-    ["--glow-a", "--glow-b", "--glow-c", "--glow-d", "--glow-e"].forEach((name, index) => {
+    const alphas = [0.24, 0.65, 0.4, 0.15];
+    ["--glow-a", "--glow-b", "--glow-c", "--glow-d"].forEach((name, index) => {
       root.setProperty(name, clamp(alphas[index] * glow, 0, 1).toFixed(3));
     });
 
@@ -215,30 +210,30 @@
   };
 
   // ---------------------------------------------------------------
-  // Wallpaper
+  // Baked background. The WPF host regenerates this JPEG when the
+  // wallpaper or a visual setting changes; the page only displays it.
   // ---------------------------------------------------------------
-  const fallbackWallpaper =
-    window.location.protocol === "file:" ? "wallpaper-preview.jpg" : "https://gta6.data/wallpaper.jpg";
-  const wallpaperUrl = params.get("wallpaper") || fallbackWallpaper;
+  const fallbackBackground =
+    window.location.protocol === "file:" ? "background-preview.jpg" : "https://gta6.data/background.jpg";
+  const backgroundUrl = params.get("background") || fallbackBackground;
 
-  function setWallpaper(url) {
-    wallpaper.src = `${url}${url.includes("?") ? "&" : "?"}v=${Date.now()}`;
+  function setBackground(url) {
+    background.src = `${url}${url.includes("?") ? "&" : "?"}v=${Date.now()}`;
   }
 
   function reveal() {
     stage.classList.add("is-ready");
   }
 
-  wallpaper.addEventListener("load", reveal, { once: true });
-  wallpaper.addEventListener("error", reveal, { once: true });
-  setWallpaper(wallpaperUrl);
+  background.addEventListener("load", reveal, { once: true });
+  background.addEventListener("error", reveal, { once: true });
+  setBackground(backgroundUrl);
 
-  // Called from the desktop host when the Windows wallpaper changes.
-  window.reloadWallpaper = function reloadWallpaper(url) {
+  window.reloadBackground = function reloadBackground(url) {
     if (url) {
-      wallpaper.src = `${url}${url.includes("?") ? "&" : "?"}v=${Date.now()}`;
+      background.src = `${url}${url.includes("?") ? "&" : "?"}v=${Date.now()}`;
     } else {
-      setWallpaper(wallpaperUrl);
+      setBackground(backgroundUrl);
     }
   };
 
@@ -253,6 +248,15 @@
   // ---------------------------------------------------------------
   const pad = (value) => String(value).padStart(2, "0");
   const last = { days: "", hours: "", minutes: "", seconds: "", progress: "" };
+  let lastMinuteKey = null;
+
+  function pulseProgress() {
+    if (isStatic || !settings.motion) return;
+    progressFill.classList.remove("pulse");
+    void progressFill.offsetWidth;
+    progressFill.classList.add("pulse");
+    window.setTimeout(() => progressFill.classList.remove("pulse"), 1400);
+  }
 
   function setText(element, key, value) {
     if (last[key] === value) return;
@@ -288,6 +292,12 @@
     setText(minutesEl, "minutes", pad(minutes));
     setText(secondsEl, "seconds", pad(seconds));
 
+    const minuteKey = days * 1440 + hours * 60 + minutes;
+    if (lastMinuteKey !== null && minuteKey !== lastMinuteKey) {
+      pulseProgress();
+    }
+    lastMinuteKey = minuteKey;
+
     const progress = ((now - WAIT_STARTED_AT) / (RELEASE_AT - WAIT_STARTED_AT)) * 100;
     setProgress(remaining === 0 ? 100 : progress);
 
@@ -314,7 +324,8 @@
     render(currentTime());
 
     if (!Number.isFinite(fixedNow)) {
-      window.setInterval(() => render(currentTime()), 250);
+      // One paint per second is enough for a seconds countdown.
+      window.setInterval(() => render(currentTime()), 500);
 
       // Resync immediately after sleep / resume or when the widget becomes visible.
       document.addEventListener("visibilitychange", () => {
