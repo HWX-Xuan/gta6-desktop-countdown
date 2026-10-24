@@ -26,9 +26,11 @@ A cinematic, wallpaper-reactive GTA VI countdown for Windows.
 - 打开其他窗口时安静地留在桌面层，不抢焦点、不占任务栏；
 - 附带一个完整的可视化设置面板，实时预览并同步到桌面。
 
-截止时间：**2026-11-18 19:00（Asia/Shanghai，UTC+8）**。到点后自动切换为「GTA VI 现已发售」。
+截止时间：**2026-11-18 19:00（Beijing，UTC+8）**。到点后自动切换为「GTA VI 现已发售」。
 
-> 粉丝自制项目，与 Rockstar Games / Take-Two Interactive 无关联，不包含任何官方游戏素材。GTA VI 及相关商标归其权利人所有。
+> 粉丝自制项目，与 Rockstar Games / Take-Two Interactive 无关联，GTA VI 及相关商标归其权利人所有。
+> 更新至v1.1.0，解决了GPU占用过高的问题，优化了 WebView2 渲染管线。目前空闲状态 GPU 占用降至 1% 以下，CPU 占用 <0.1%，内存 <110MB。真正实现零负担常驻。
+> 由Deepseek v4.1 flash 1017大肥鱼全权开发，除了这段话，总吞下1.43亿Token，6.05 RMB，且用且珍惜🫠
 
 ## 效果预览
 
