@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>GTA VI · 效果设置</title>
+  <link rel="stylesheet" href="settings.css">
+</head>
+<body>
+  <div class="ambient" aria-hidden="true">
+    <img id="ambientWallpaper" alt="" draggable="false">
+    <div class="ambient-glow"></div>
+    <div class="ambient-grain"></div>
+  </div>
+
+  <div class="page">
+    <header class="masthead">
+      <div class="masthead-copy">
+        <div class="kicker"><span class="kicker-dot"></span><span data-i18n="kicker">GTA VI · DESKTOP WIDGET</span></div>
+        <h1 data-i18n="title">效果设置</h1>
+        <p data-i18n="subtitle">把桌面倒计时调成你喜欢的样子。</p>
+      </div>
+      <div class="language-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="zh" class="active">中文</button>
+        <button type="button" data-lang="en">English</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <main class="settings-column">
+        <section class="card">
+          <div class="card-heading">
+            <div class="card-title"><span class="index">01</span><h2 data-i18n="appearance">外观</h2></div>
+            <span class="card-hint" data-i18n="appearanceHint">大小、主题色和动效</span>
+          </div>
+
+          <div class="control-grid">
+            <div class="control">
+              <div class="control-label"><label for="numberScale" data-i18n="numberScale">数字大小</label><output id="numberScaleValue">100%</output></div>
+              <input class="range" type="range" id="numberScale" data-setting="numberScale" data-scale="percent" min="75" max="125" step="1" value="100">
+              <div class="range-ends"><span data-i18n="small">小</span><span data-i18n="large">大</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><span data-i18n="accent">主题色</span><span class="accent-note" data-i18n="accentHint">霓虹光晕的颜色</span></div>
+              <div class="swatches" role="group" aria-label="Accent color">
+                <button type="button" class="swatch" data-accent="#ff2f96" style="--swatch:#ff2f96" aria-label="Magenta"></button>
+                <button type="button" class="swatch" data-accent="#a66bff" style="--swatch:#a66bff" aria-label="Violet"></button>
+                <button type="button" class="swatch" data-accent="#4fd8ff" style="--swatch:#4fd8ff" aria-label="Cyan"></button>
+                <button type="button" class="swatch" data-accent="#ffa45c" style="--swatch:#ffa45c" aria-label="Amber"></button>
+                <label class="color-well" title="Custom color">
+                  <input type="color" id="accentCustom" value="#ff2f96" aria-label="Custom accent color">
+                  <span>+</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="toggle-row">
+            <div class="toggle-copy">
+              <span class="toggle-title" data-i18n="motion">动态效果</span>
+              <span class="toggle-desc" data-i18n="motionHint">壁纸缓慢漂移、光晕呼吸和扫描线</span>
+            </div>
+            <button type="button" class="switch" id="motionToggle" role="switch" aria-checked="true"><span></span></button>
+          </div>
+        </section>
+
+        <section class="card">
+          <div class="card-heading">
+            <div class="card-title"><span class="index">02</span><h2 data-i18n="background">背景效果</h2></div>
+            <span class="card-hint" data-i18n="backgroundHint">全部实时作用于桌面层</span>
+          </div>
+
+          <div class="control-grid">
+            <div class="control">
+              <div class="control-label"><label for="blur" data-i18n="blur">背景模糊</label><output id="blurValue">34 px</output></div>
+              <input class="range" type="range" id="blur" data-setting="blur" data-scale="raw" min="0" max="60" step="1" value="34">
+              <div class="range-ends"><span data-i18n="soft">柔和</span><span data-i18n="heavy">强烈</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><label for="brightness" data-i18n="brightness">背景亮度</label><output id="brightnessValue">52%</output></div>
+              <input class="range" type="range" id="brightness" data-setting="brightness" data-scale="percent" min="25" max="85" step="1" value="52">
+              <div class="range-ends"><span data-i18n="dark">暗</span><span data-i18n="bright">亮</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><label for="saturation" data-i18n="saturation">色彩饱和度</label><output id="saturationValue">140%</output></div>
+              <input class="range" type="range" id="saturation" data-setting="saturation" data-scale="percent" min="60" max="200" step="1" value="140">
+              <div class="range-ends"><span data-i18n="muted">淡</span><span data-i18n="vivid">浓</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><label for="glow" data-i18n="glow">霓虹光晕</label><output id="glowValue">100%</output></div>
+              <input class="range" type="range" id="glow" data-setting="glow" data-scale="percent" min="0" max="150" step="5" value="100">
+              <div class="range-ends"><span data-i18n="clean">干净</span><span data-i18n="dreamy">梦幻</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><label for="grain" data-i18n="grain">颗粒噪点</label><output id="grainValue">9%</output></div>
+              <input class="range" type="range" id="grain" data-setting="grain" data-scale="percent" min="0" max="20" step="1" value="9">
+              <div class="range-ends"><span data-i18n="clean">干净</span><span data-i18n="filmic">胶片</span></div>
+            </div>
+
+            <div class="control">
+              <div class="control-label"><label for="vignette" data-i18n="vignette">画面暗角</label><output id="vignetteValue">90%</output></div>
+              <input class="range" type="range" id="vignette" data-setting="vignette" data-scale="percent" min="0" max="100" step="5" value="90">
+              <div class="range-ends"><span data-i18n="open">开阔</span><span data-i18n="focused">聚焦</span></div>
+            </div>
+          </div>
+        </section>
+
+        <footer class="actions">
+          <button type="button" class="quiet-button" id="resetButton" data-i18n="reset">恢复默认</button>
+          <div class="save-state" id="saveState"><span class="save-dot"></span><span id="saveStateText" data-i18n="saved">已自动保存</span></div>
+          <button type="button" class="primary-button" id="closeButton" data-i18n="close">完成</button>
+        </footer>
+      </main>
+
+      <aside class="preview-column">
+        <div class="preview-card">
+          <div class="preview-heading">
+            <span data-i18n="preview">实时预览</span>
+            <span class="live-badge"><span></span><span data-i18n="live">LIVE</span></span>
+          </div>
+
+          <div class="preview-stage" id="previewStage">
+            <img id="previewWallpaper" alt="" draggable="false">
+            <div class="preview-grade"></div>
+            <div class="preview-glow"></div>
+            <div class="preview-vignette"></div>
+            <div class="preview-grain"></div>
+            <div class="preview-content">
+              <div class="preview-brand">GTA VI <span id="previewHeadline" data-i18n="previewHeadline">发售倒计时</span></div>
+              <div class="preview-numbers"><span id="previewDays">25</span><span class="preview-sep">:</span><span id="previewHours">05</span><span class="preview-sep">:</span><span id="previewMinutes">50</span></div>
+              <div class="preview-track"><div id="previewFill"></div></div>
+              <div class="preview-caption"><span data-i18n="progress">等待进度</span><span id="previewProgress">97.6%</span></div>
+            </div>
+          </div>
+
+          <p class="preview-note" data-i18n="previewNote">预览会跟随滑杆实时变化，并同步到桌面。</p>
+
+          <div class="shortcut-tip">
+            <kbd>Ctrl</kbd><span>+</span><kbd>Alt</kbd><span>+</span><kbd>S</kbd>
+            <span data-i18n="shortcutHint">随时打开设置</span>
+          </div>
+        </div>
+
+        <section class="card system-card">
+          <div class="card-heading">
+            <div class="card-title"><span class="index">03</span><h2 data-i18n="system">系统</h2></div>
+            <span class="card-hint" data-i18n="systemHint">随 Windows 一起，安静地待在桌面</span>
+          </div>
+
+          <div class="system-list">
+            <div class="system-row">
+              <div class="system-icon">↻</div>
+              <div class="toggle-copy">
+                <span class="toggle-title-row">
+                  <span class="toggle-title" data-i18n="autoStart">开机自动启动</span>
+                  <span class="system-status" id="autoStartStatus">已关闭</span>
+                </span>
+                <span class="toggle-desc" data-i18n="autoStartHint">登录 Windows 后自动启动，使用静默启动器</span>
+              </div>
+              <button type="button" class="switch" id="autoStartToggle" role="switch" aria-checked="false"><span></span></button>
+            </div>
+
+            <div class="system-row">
+              <div class="system-icon">●</div>
+              <div class="toggle-copy">
+                <span class="toggle-title" data-i18n="trayIcon">显示托盘图标</span>
+                <span class="toggle-desc" data-i18n="trayIconHint">在任务栏右下角显示 VI 图标；关闭后可用 Ctrl+Alt+S 打开设置</span>
+              </div>
+              <button type="button" class="switch" id="trayToggle" role="switch" aria-checked="true"><span></span></button>
+            </div>
+
+            <div class="system-row action-row">
+              <div class="system-icon">⌘</div>
+              <div class="toggle-copy">
+                <span class="toggle-title" data-i18n="dataFolder">数据文件夹</span>
+                <span class="toggle-desc" data-i18n="dataFolderHint">日志、壁纸缓存和设置文件都在这里</span>
+              </div>
+              <button type="button" class="quiet-button" id="openDataButton" data-i18n="openFolder">打开</button>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+
+  <script src="settings.js"></script>
+</body>
+</html>

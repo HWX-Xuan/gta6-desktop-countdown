@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>GTA VI · 发售倒计时</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="stage" class="stage">
+
+    <!-- Wallpaper plate -->
+    <div class="backdrop" aria-hidden="true">
+      <img id="wallpaper" class="wallpaper" alt="" draggable="false">
+      <div class="grade"></div>
+      <div class="wash wash-top"></div>
+      <div class="wash wash-bottom"></div>
+      <div class="glow glow-pink"></div>
+      <div class="glow glow-blue"></div>
+      <div class="glow glow-amber"></div>
+      <div class="beam"></div>
+      <div class="bokeh bokeh-a"></div>
+      <div class="bokeh bokeh-b"></div>
+      <div class="bokeh bokeh-c"></div>
+      <div class="vignette"></div>
+      <div class="grain"></div>
+    </div>
+
+    <!-- Top chrome -->
+    <div class="eyebrow">
+      <span class="eyebrow-rule"></span>
+      <span>VICE CITY&nbsp;&nbsp;·&nbsp;&nbsp;LEONIDA</span>
+    </div>
+
+    <div class="release">
+      <span class="release-dot"></span>
+      <span class="release-label" id="releaseLabel">发售日</span>
+      <span class="release-date">2026.11.18</span>
+      <span class="release-time">19:00</span>
+    </div>
+
+    <header class="heading">
+      <svg class="clock" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+        <path d="M12 7.3v5.2l3.35 1.95" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <h1 id="headline">GTA VI&nbsp;&nbsp;发售倒计时</h1>
+    </header>
+
+    <!-- Countdown -->
+    <main class="countdown" id="countdown" aria-live="off">
+      <section class="unit">
+        <div class="number-wrap">
+          <div class="value" id="days">25</div>
+        </div>
+        <div class="unit-label"><span id="labelDays">天</span></div>
+      </section>
+
+      <div class="rule" aria-hidden="true"></div>
+
+      <section class="unit">
+        <div class="number-wrap">
+          <div class="value" id="hours">11</div>
+        </div>
+        <div class="unit-label"><span id="labelHours">小时</span></div>
+      </section>
+
+      <div class="rule" aria-hidden="true"></div>
+
+      <section class="unit">
+        <div class="number-wrap">
+          <div class="value" id="minutes">17</div>
+        </div>
+        <div class="unit-label"><span id="labelMinutes">分钟</span></div>
+      </section>
+
+      <div class="rule" aria-hidden="true"></div>
+
+      <section class="unit seconds-unit">
+        <div class="number-wrap">
+          <div class="value" id="seconds">40</div>
+        </div>
+        <div class="unit-label"><span id="labelSeconds">秒</span></div>
+      </section>
+    </main>
+
+    <!-- Progress -->
+    <footer class="progress">
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+        <div class="progress-glow" id="progressGlow"></div>
+        <div class="progress-head" id="progressHead"></div>
+      </div>
+      <div class="progress-copy">
+        <span class="progress-label" id="progressLabel">等待进度</span>
+        <span class="progress-value" id="progressValue">97.6%</span>
+      </div>
+      <div class="progress-foot">
+        <span class="foot-left" id="footLeft">FIRST TRAILER&nbsp;&nbsp;/&nbsp;&nbsp;2023.12.04</span>
+        <span class="foot-mid" id="footMid">THE WAIT IS ALMOST OVER</span>
+        <span class="foot-right" id="footRight">RELEASE&nbsp;&nbsp;/&nbsp;&nbsp;2026.11.18</span>
+      </div>
+    </footer>
+
+    <div class="noise-line" aria-hidden="true"></div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

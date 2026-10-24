@@ -1,0 +1,21 @@
+# .NET / WPF
+**/bin/
+**/obj/
+.vs/
+*.user
+*.suo
+
+# Local publish and packaging output
+dist/
+portable/
+portable-stage/
+
+# Machine-specific helper files
+tools/GTA6-Shortcut.lnk
+
+# Local logs
+*.log
+
+# Windows shell
+Thumbs.db
+Desktop.ini

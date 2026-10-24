@@ -1,0 +1,46 @@
+<Window x:Class="Gta6Countdown.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
+        Title="GTA VI 发售倒计时"
+        Width="1707"
+        Height="1067"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="False"
+        ShowInTaskbar="False"
+        ShowActivated="False"
+        Topmost="False"
+        WindowStartupLocation="Manual"
+        Background="#0A0610"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True">
+    <Grid Background="#0A0610">
+        <wv2:WebView2 x:Name="Browser" />
+
+        <Border x:Name="FallbackPanel"
+                Visibility="Collapsed"
+                Background="#120A1B">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="760">
+                <TextBlock Text="GTA VI"
+                           Foreground="#FF4CA6"
+                           FontFamily="Anton, Segoe UI"
+                           FontSize="96"
+                           HorizontalAlignment="Center" />
+                <TextBlock Text="桌面倒计时需要 Microsoft Edge WebView2 Runtime"
+                           Foreground="#FFF7FB"
+                           FontFamily="Microsoft YaHei UI, Segoe UI"
+                           FontSize="22"
+                           FontWeight="SemiBold"
+                           TextAlignment="Center"
+                           Margin="0,10,0,14" />
+                <TextBlock x:Name="FallbackDetail"
+                           Foreground="#BFA8B9"
+                           FontFamily="Microsoft YaHei UI, Segoe UI"
+                           FontSize="14"
+                           TextAlignment="Center"
+                           TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
