@@ -1,4 +1,4 @@
-# GTA VI Desktop Countdown v1.2.0
+# GTA VI Desktop Countdown v1.1.0
 
 > 桌面倒计时在分辨率、画质和更新机制上的一个完整升级版本。
 
