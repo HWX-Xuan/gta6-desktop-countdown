@@ -28,7 +28,8 @@ A cinematic, wallpaper-reactive GTA VI countdown for Windows.
 
 截止时间：**2026-11-18 19:00（Asia/Shanghai，UTC+8）**。到点后自动切换为「GTA VI 现已发售」。
 
-> 粉丝自制项目，与 Rockstar Games / Take-Two Interactive 无关联，不包含任何官方游戏素材。GTA VI 及相关商标归其权利人所有。
+> 粉丝自制项目，与 Rockstar Games / Take-Two Interactive 无关联，GTA VI 及相关商标归其权利人所有。
+> 花费3.28 RMB，0.76亿token，除了这句话之外完全由Deepseek v4.1 flash开发。
 
 ## 效果预览
 
